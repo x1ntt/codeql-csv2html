@@ -1,0 +1,422 @@
+<html>
+<head>
+	<title>CodeQL 代码审计</title>
+	
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Expires" content="0">
+	
+	<style>
+		body {
+			background-color: #f0f0f033;
+		}
+
+		div {
+			border-radius: 5px;
+		}
+		h3 {
+			font-size: 17px;
+			color:#2475bd;
+			margin: 10 5px;
+		}
+
+		p {
+			margin: auto 5px;
+			font-size: 14px;
+    		color: #1c1c1c;
+		}
+
+		.main_window{
+			border: 2px solid #f0000000;
+			margin: 20px;
+			padding: 5px;
+		}
+		
+		.data_table {
+			width: 100%;
+			border-collapse:collapse;
+			border: 1px solid #0000ff00;
+			background-color: rgb(255, 255, 255);
+			box-shadow: 0 4px 4px 0 rgba(0,0,0,0.2), 0 8px 8px 0 rgba(0,0,0,0.19);
+		}
+		
+		.data_table td{
+			padding: 5px;
+			border: 1px solid #CCCCCCAA;
+		}
+		
+		.title_row {
+			background-color: #f1f1f16e;
+			padding: 10px;
+			transition: all 100ms ease-out;
+		}
+
+		.title_row:hover {
+			background-color: #f1f1f1;
+		}
+		
+		.data_item {
+			display: "none";
+			background-color: #FFFFFF;
+			font-size: 13px;
+			color: #505050;
+		}
+
+		.data_item:hover{
+			background-color: #e4f0ff6e;
+		}
+		
+		.data_item_none {
+			display: "none";
+		}
+		
+		.data_item_etype_none {
+			display: "none";
+		}
+		
+		.head_div {
+			overflow: hidden;
+			width: 100%;
+			/*text-align: right;*/
+			margin-bottom: 15px;
+			border: 1px solid #dfdfdf;
+			box-shadow: 0 4px 4px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+		}
+
+		.info_div {
+			display:inline;
+			float: left;
+		}
+
+		.filter_div {
+			display:inline;
+			float: right;
+		}
+		
+		.filter_btn {
+			background-color: rgb(238, 238, 238);
+			border: 1px solid #cdcdcd;
+			padding: 5px;
+			margin: 8px;
+			color: #404040;
+		}
+		.filter_btn_clicked {
+			background-color: #f9b86e;
+			border: 1px solid #f9b86e;
+			padding: 5px;
+			margin: 8px;
+			color: #ffffff;
+		}
+
+		td {
+			margin: 5px;
+		}
+
+		th {
+			padding: 15px;
+		}
+		
+		.error_num {
+			border-radius: 10px;
+			color: #ffffff;
+			background-color: #f9b86e;
+			font-size: 5px;
+			padding: 3px;
+		}
+
+		.info_tips {
+			margin: 11px;
+			font-size: 16px;
+		}
+		b {
+			color: #f9b86e;
+		}
+	</style>
+	
+	<script>
+		function hide_item(ele, class_name, is_hide) {
+			var items = document.getElementsByClassName(class_name);
+			for (var i=0; i<items.length; i++) {
+				if (is_hide){
+					items[i].style.display = "none";
+					items[i].classList.add("data_item_none");
+				}else{
+					if (!items[i].classList.contains("data_item_etype_none")){
+						items[i].style.display = "";
+					}
+					items[i].classList.remove("data_item_none");
+				}
+			}
+			if (is_hide)
+				ele.setAttribute("onclick", "hide_item(this, '"+class_name+"', false)");
+			else
+				ele.setAttribute("onclick", "hide_item(this, '"+class_name+"', true)");
+		}
+		
+		function hide_error(ele) {
+			if (ele.className == "filter_btn"){
+				ele.className = "filter_btn_clicked";
+				// 隐藏
+				var items = document.getElementsByClassName(ele.id);
+				for (var i=0; i<items.length; i++) {
+					items[i].style.display = "none";
+					items[i].classList.add("data_item_etype_none");
+				}
+			}
+			else{
+				ele.className = "filter_btn";
+				// 尝试显示
+				var items = document.getElementsByClassName(ele.id);
+				for (var i=0; i<items.length; i++) {
+					if (!items[i].classList.contains("data_item_none")) {
+						items[i].style.display = "";
+					}
+					items[i].classList.remove("data_item_etype_none");
+				}
+			}
+			document.getElementById("tips").style.display = "none";
+		}
+	</script>
+</head>
+
+<body>
+	<h1>CodeQL 代码审计</h1>
+
+	<div class="main_window">
+			<div class="head_div">
+				<div class="info_div">
+					<p class="info_tips">
+						触发<b>5</b>条规则 共<b>24</b>个报告，文件生成时间：2023年05月25日 10:50:45 
+					</p>
+				</div>
+				<div class="filter_div">
+					<div id="error_level_filter" class="error_level">
+						<font id="tips" style="color:#c7c7c7">点击隐藏对应错误-></font> <button id="etype_recommendation" class="filter_btn" onclick="hide_error(this)">recommendation</button><button id="etype_warning" class="filter_btn" onclick="hide_error(this)">warning</button><button id="etype_error" class="filter_btn" onclick="hide_error(this)">error</button>
+					</div>
+				</div>
+			</div>
+			<table class="data_table">
+				<tr>
+					<th>文件名</th>
+					<th>描述</th>
+					<th>错误级别</th>
+					<th>位置</th>
+				</tr>
+				
+        <tr onclick="hide_item(this, 'rule_0', false)">
+            <td colspan="4" class="title_row">
+                <div>
+                    <h3>Wrong type of arguments to formatting function <span class="error_num">6<span></h3>
+                    <p>Calling a printf-like function with the wrong type of arguments causes unpredictable behavior.</p>
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_0 etype_error" style="display: none;">
+            <td>/utils/cc/thread.h</td>
+            <td>This argument should be of type 'unsigned int' but is of type 'unsigned long'</td>
+            <td>error</td>
+            <td>127行16列</td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_0 etype_error" style="display: none;">
+            <td>/utils/cc/variant.h</td>
+            <td>This argument should be of type 'int' but is of type 'unsigned long'</td>
+            <td>error</td>
+            <td>225行50列</td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_0 etype_error" style="display: none;">
+            <td>/utils/cc/variant.h</td>
+            <td>This argument should be of type 'int' but is of type 'unsigned long'</td>
+            <td>error</td>
+            <td>275行50列</td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_0 etype_error" style="display: none;">
+            <td>/utils/io/binder.h</td>
+            <td>This argument should be of type 'unsigned int' but is of type 'unsigned long'</td>
+            <td>error</td>
+            <td>243行7列</td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_0 etype_error" style="display: none;">
+            <td>/utils/io/binder.h</td>
+            <td>This argument should be of type 'unsigned int' but is of type 'unsigned long'</td>
+            <td>error</td>
+            <td>243行16列</td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_0 etype_error" style="display: none;">
+            <td>/utils/io/binder.h</td>
+            <td>This argument should be of type 'unsigned int' but is of type 'unsigned long'</td>
+            <td>error</td>
+            <td>243行28列</td>
+        </tr>
+    
+        <tr onclick="hide_item(this, 'rule_1', false)">
+            <td colspan="4" class="title_row">
+                <div>
+                    <h3>Suspicious call to memset <span class="error_num">2<span></h3>
+                    <p>Use of memset where the size argument is computed as the size of some non-struct type. When initializing a buffer, you should specify its size as &lt;number of elements&gt; * &lt;size of one element&gt; to ensure portability.</p>
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_1 etype_recommendation" style="display: none;">
+            <td>/ctest/hj/table/tableTempl.h</td>
+            <td>The size of the memory area set by memset should not be the size of the type int64_t[16].</td>
+            <td>recommendation</td>
+            <td>1564行3列</td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_1 etype_recommendation" style="display: none;">
+            <td>/ctest/hj/table/tableTempl.h</td>
+            <td>The size of the memory area set by memset should not be the size of the type unsigned int[5].</td>
+            <td>recommendation</td>
+            <td>1491行3列</td>
+        </tr>
+    
+        <tr onclick="hide_item(this, 'rule_2', false)">
+            <td colspan="4" class="title_row">
+                <div>
+                    <h3>Inconsistent nullness check <span class="error_num">8<span></h3>
+                    <p>The result value of a function is often checked for nullness, but not always. Since the value is mostly checked, it is likely that the function can return null values in some cases, and omitting the check could crash the program.</p>
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_2 etype_error" style="display: none;">
+            <td>/ctest/hj/gimp.cpp</td>
+            <td>The result of this call to Locate is not checked for null, but 80% of calls to Locate check for null.</td>
+            <td>error</td>
+            <td>92行29列</td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_2 etype_error" style="display: none;">
+            <td>/ctest/hj/table/tableTempl.inl</td>
+            <td>The result of this call to GetEntry is not checked for null, but 89% of calls to GetEntry check for null.</td>
+            <td>error</td>
+            <td>2127行39列</td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_2 etype_error" style="display: none;">
+            <td>/ctest/hj/table/tableTemplMan.cpp</td>
+            <td>The result of this call to get_data_ptr is not checked for null, but 83% of calls to get_data_ptr check for null.</td>
+            <td>error</td>
+            <td>1632行72列</td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_2 etype_error" style="display: none;">
+            <td>/ctest/hj/table/tableTemplMan.cpp</td>
+            <td>The result of this call to get_data_ptr is not checked for null, but 83% of calls to get_data_ptr check for null.</td>
+            <td>error</td>
+            <td>1662行84列</td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_2 etype_error" style="display: none;">
+            <td>/ctest/hj/table/tableProcess.cpp</td>
+            <td>The result of this call to GetEntry is not checked for null, but 89% of calls to GetEntry check for null.</td>
+            <td>error</td>
+            <td>2905行105列</td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_2 etype_error" style="display: none;">
+            <td>/ctest/hj/table/tableProcess.cpp</td>
+            <td>The result of this call to GetCapOrSelf is not checked for null, but 75% of calls to GetCapOrSelf check for null.</td>
+            <td>error</td>
+            <td>2966行35列</td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_2 etype_error" style="display: none;">
+            <td>/ctest/hj/table/tableProcess.cpp</td>
+            <td>The result of this call to GetTaskTemplByID is not checked for null, but 96% of calls to GetTaskTemplByID check for null.</td>
+            <td>error</td>
+            <td>5722行42列</td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_2 etype_error" style="display: none;">
+            <td>/ctest/hj/cmd.cpp</td>
+            <td>The result of this call to Clone is not checked for null, but 75% of calls to Clone check for null.</td>
+            <td>error</td>
+            <td>147行25列</td>
+        </tr>
+    
+        <tr onclick="hide_item(this, 'rule_3', false)">
+            <td colspan="4" class="title_row">
+                <div>
+                    <h3>Non-zero value cast to pointer <span class="error_num">6<span></h3>
+                    <p>A constant value other than zero is converted to a pointer type. This is a dangerous practice, since the meaning of the numerical value of pointers is platform dependent.</p>
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_3 etype_recommendation" style="display: none;">
+            <td>/ctest/include/hashtab.h</td>
+            <td>Nonzero value _next cast to pointer.</td>
+            <td>recommendation</td>
+            <td>444行28列</td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_3 etype_recommendation" style="display: none;">
+            <td>/ctest/hj/guard.h</td>
+            <td>Nonzero value npc_list cast to pointer.</td>
+            <td>recommendation</td>
+            <td>27行29列</td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_3 etype_recommendation" style="display: none;">
+            <td>/ctest/hj/manager.h</td>
+            <td>Nonzero value pNext cast to pointer.</td>
+            <td>recommendation</td>
+            <td>66行26列</td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_3 etype_recommendation" style="display: none;">
+            <td>/ctest/include/hash.h</td>
+            <td>Nonzero value _node cast to pointer.</td>
+            <td>recommendation</td>
+            <td>512行20列</td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_3 etype_recommendation" style="display: none;">
+            <td>/ctest/include/hash.h</td>
+            <td>Nonzero value _np cast to pointer.</td>
+            <td>recommendation</td>
+            <td>517行20列</td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_3 etype_recommendation" style="display: none;">
+            <td>/ctest/include/hash.h</td>
+            <td>Nonzero value _next cast to pointer.</td>
+            <td>recommendation</td>
+            <td>523行27列</td>
+        </tr>
+    
+        <tr onclick="hide_item(this, 'rule_4', false)">
+            <td colspan="4" class="title_row">
+                <div>
+                    <h3>save_load_check <span class="error_num">2<span></h3>
+                    <p>nan</p>
+                </div>
+            </td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_4 etype_warning" style="display: none;">
+            <td>/ctest/hj/com.cpp</td>
+            <td>please check operator&lt;&lt;</td>
+            <td>warning</td>
+            <td>1743行16列</td>
+        </tr>
+    
+        <tr class="data_item data_item_none rule_4 etype_warning" style="display: none;">
+            <td>/ctest/hj/com.cpp</td>
+            <td>please check operator&gt;&gt;</td>
+            <td>warning</td>
+            <td>1442行16列</td>
+        </tr>
+    
+			</table>
+	</div>
+</body>
+</html>

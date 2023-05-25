@@ -1,0 +1,209 @@
+<html>
+<head>
+	<title>CodeQL 代码审计</title>
+	
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+	<meta http-equiv="Pragma" content="no-cache">
+	<meta http-equiv="Expires" content="0">
+	
+	<style>
+		body {
+			background-color: #f0f0f033;
+		}
+
+		div {
+			border-radius: 5px;
+		}
+		h3 {
+			font-size: 17px;
+			color:#2475bd;
+			margin: 10 5px;
+		}
+
+		p {
+			margin: auto 5px;
+			font-size: 14px;
+    		color: #1c1c1c;
+		}
+
+		.main_window{
+			border: 2px solid #f0000000;
+			margin: 20px;
+			padding: 5px;
+		}
+		
+		.data_table {
+			width: 100%;
+			border-collapse:collapse;
+			border: 1px solid #0000ff00;
+			background-color: rgb(255, 255, 255);
+			box-shadow: 0 4px 4px 0 rgba(0,0,0,0.2), 0 8px 8px 0 rgba(0,0,0,0.19);
+		}
+		
+		.data_table td{
+			padding: 5px;
+			border: 1px solid #CCCCCCAA;
+		}
+		
+		.title_row {
+			background-color: #f1f1f16e;
+			padding: 10px;
+			transition: all 100ms ease-out;
+		}
+
+		.title_row:hover {
+			background-color: #f1f1f1;
+		}
+		
+		.data_item {
+			display: "none";
+			background-color: #FFFFFF;
+			font-size: 13px;
+			color: #505050;
+		}
+
+		.data_item:hover{
+			background-color: #e4f0ff6e;
+		}
+		
+		.data_item_none {
+			display: "none";
+		}
+		
+		.data_item_etype_none {
+			display: "none";
+		}
+		
+		.head_div {
+			overflow: hidden;
+			width: 100%;
+			/*text-align: right;*/
+			margin-bottom: 15px;
+			border: 1px solid #dfdfdf;
+			box-shadow: 0 4px 4px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+		}
+
+		.info_div {
+			display:inline;
+			float: left;
+		}
+
+		.filter_div {
+			display:inline;
+			float: right;
+		}
+		
+		.filter_btn {
+			background-color: rgb(238, 238, 238);
+			border: 1px solid #cdcdcd;
+			padding: 5px;
+			margin: 8px;
+			color: #404040;
+		}
+		.filter_btn_clicked {
+			background-color: #f9b86e;
+			border: 1px solid #f9b86e;
+			padding: 5px;
+			margin: 8px;
+			color: #ffffff;
+		}
+
+		td {
+			margin: 5px;
+		}
+
+		th {
+			padding: 15px;
+		}
+		
+		.error_num {
+			border-radius: 10px;
+			color: #ffffff;
+			background-color: #f9b86e;
+			font-size: 5px;
+			padding: 3px;
+		}
+
+		.info_tips {
+			margin: 11px;
+			font-size: 16px;
+		}
+		b {
+			color: #f9b86e;
+		}
+	</style>
+	
+	<script>
+		function hide_item(ele, class_name, is_hide) {
+			var items = document.getElementsByClassName(class_name);
+			for (var i=0; i<items.length; i++) {
+				if (is_hide){
+					items[i].style.display = "none";
+					items[i].classList.add("data_item_none");
+				}else{
+					if (!items[i].classList.contains("data_item_etype_none")){
+						items[i].style.display = "";
+					}
+					items[i].classList.remove("data_item_none");
+				}
+			}
+			if (is_hide)
+				ele.setAttribute("onclick", "hide_item(this, '"+class_name+"', false)");
+			else
+				ele.setAttribute("onclick", "hide_item(this, '"+class_name+"', true)");
+		}
+		
+		function hide_error(ele) {
+			if (ele.className == "filter_btn"){
+				ele.className = "filter_btn_clicked";
+				// 隐藏
+				var items = document.getElementsByClassName(ele.id);
+				for (var i=0; i<items.length; i++) {
+					items[i].style.display = "none";
+					items[i].classList.add("data_item_etype_none");
+				}
+			}
+			else{
+				ele.className = "filter_btn";
+				// 尝试显示
+				var items = document.getElementsByClassName(ele.id);
+				for (var i=0; i<items.length; i++) {
+					if (!items[i].classList.contains("data_item_none")) {
+						items[i].style.display = "";
+					}
+					items[i].classList.remove("data_item_etype_none");
+				}
+			}
+			document.getElementById("tips").style.display = "none";
+		}
+	</script>
+</head>
+
+<body>
+	<h1>CodeQL 代码审计</h1>
+
+	<div class="main_window">
+			<div class="head_div">
+				<div class="info_div">
+					<p class="info_tips">
+						{{info_tips_content}}
+					</p>
+				</div>
+				<div class="filter_div">
+					<div id="error_level_filter" class="error_level">
+						<font id="tips" style="color:#c7c7c7">点击隐藏对应错误-></font> {{error_content}}
+					</div>
+				</div>
+			</div>
+			<table class="data_table">
+				<tr>
+					<th>文件名</th>
+					<th>描述</th>
+					<th>错误级别</th>
+					<th>位置</th>
+				</tr>
+				{{table_content}}
+			</table>
+	</div>
+</body>
+</html>
